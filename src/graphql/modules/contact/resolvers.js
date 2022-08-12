@@ -2,23 +2,14 @@ const db = require('../../../db')
 
 module.exports = {
     Query: {
-        contacts: async () => await db('contact'),
+        contacts: async (obj, args, context, info) => await context.userRegisterService.contacts()
     },
     Mutation: {
-        createContact: async (_, { data }) => 
-            await (await db('contact').insert(data).returning('*'))[0],
-        updateContact: async  (_, { id, data }) =>
-            await (await db('contact').where({ id }).update(data).returning('*'))[0],
-            deleteContact: async (_, { filter }) => {
-                if (filter.id) {
-                    return db('contact').where({ id: filter.id }).delete()
-                }
-
-                if (filter.email) {
-                    return db('contact').where({ email: filter.email }).delete()
-                }
-
-                throw new Error('pass a parameter!')
-            }
+        createContact: async (_, { data }, { userRegisterService }) => 
+            await userRegisterService.createContact(data),
+        updateContact: async  (_, { id, data }, { userRegisterService }) =>
+            await userRegisterService.updateContact(id, data),
+        deleteContact: async (_, { filter }, { userRegisterService }) => 
+            await userRegisterService.deleteContact(filter)
     }
 }
